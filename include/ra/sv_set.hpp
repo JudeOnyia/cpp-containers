@@ -2,6 +2,7 @@
 #define SVSETHPP
 
 #include<stddef.h>
+#include<functional>
 
 
 namespace ra::container {
@@ -31,19 +32,19 @@ namespace ra::container {
 			// container.
 			// This type must support all of the functionality associated
 			// with a random-access iterator.
-			using iterator = implementation-defined;
+			using iterator = Key*;
 
 			// The non-mutable (random-access) const_iterator type for
 			// the container.
 			// This type must support all of the functionality associated
 			// with a random-access iterator.
-			using const_iterator = implementation-defined;
+			using const_iterator = const Key*;
 	
 			// Creates an empty set (i.e., a set containing no elements)
 			// with a capacity of zero (i.e., no allocated storage for
 			// elements).
 			// Time complexity: Constant.
-			sv_set() noexcept(std::is_nothrow_default_constructible_v<key_compare>);
+			sv_set() noexcept(std::is_nothrow_default_constructible_v<key_compare>) : buffer_(nullptr), begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {}
 
 			// Create a set consisting of the n elements in the
 			// range starting at first, where the elements in the range
@@ -172,6 +173,13 @@ namespace ra::container {
 			// Time complexity: Logarithmic.
 			iterator find(const key_type& k);
 			const_iterator find(const key_type& k) const;
+
+		private:
+			char* buffer_;
+			key_type* begin_;
+			key_type* end_;
+			key_type* finish_;
+			key_compare compare_obj_;
 
 
 	};
