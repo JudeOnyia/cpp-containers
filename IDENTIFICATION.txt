@@ -1,0 +1,7 @@
+name "Jude Onyia"
+student_id "V00947095"
+email "judeonyia10@gmail.com"
+term "2020-05"
+course "ECE596C"
+section "T01"
+assignment "cpp_containers"
