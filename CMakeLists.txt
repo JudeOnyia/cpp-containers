@@ -1,3 +1,6 @@
+# Definition of options "ENABLE_ASAN" and "ENABLE_LSAN" for sanitizers 
+include(Sanitizers.cmake)
+
 # Specify Minimum Required Version
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
