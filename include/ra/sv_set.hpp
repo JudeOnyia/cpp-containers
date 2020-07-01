@@ -3,6 +3,9 @@
 
 #include<stddef.h>
 #include<functional>
+#include<memory>
+#include<utility>
+#include<algorithm>
 
 
 namespace ra::container {
@@ -44,7 +47,7 @@ namespace ra::container {
 			// with a capacity of zero (i.e., no allocated storage for
 			// elements).
 			// Time complexity: Constant.
-			sv_set() noexcept(std::is_nothrow_default_constructible_v<key_compare>) : buffer_(nullptr), begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {}
+			sv_set() noexcept(std::is_nothrow_default_constructible<key_compare>::value) : buffer_(nullptr), begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {}
 
 			// Create a set consisting of the n elements in the
 			// range starting at first, where the elements in the range
@@ -60,60 +63,120 @@ namespace ra::container {
 			// Note: The type InputIterator must meet the requirements of
 			// an input iterator.
 			template <class InputIterator>
-			sv_set(ordered_and_unique_range, InputIterator first, std::size_t n);
+			sv_set(ordered_and_unique_range, InputIterator first, std::size_t n){
+				begin_ = static_cast<key_type*>(::operator new(n * sizeof(key_type)));
+				end_ = begin_ + n;
+				// MIGHT NEED TO USE INSERT
+			}
 
 			// Move construction.
 			// Creates a new set by moving from the specified set other.
 			// After construction, the source set (i.e., other) is
 			// guaranteed to be empty.
 			// Time complexity: Constant.
-			sv_set(sv_set&& other) noexcept(std::is_nothrow_move_constructible_v<key_compare>);
+			sv_set(sv_set&& other) noexcept(std::is_nothrow_move_constructible<key_compare>::value){
+				begin_ = other.begin_;
+				other.begin_ = nullptr;
+				end_ = other.end_;
+				other.end_ = nullptr;
+				finish_ = other.finish_;
+				other.finish_ = nullptr;
+
+			}
 
 			// Move assignment.
 			// Assigns the value of the specified set other to *this
 			// via a move operation. After the move operation, the source set (i.e., other)
 			// is guaranteed to be empty. Time complexity: Linear in size().
 			// Precondition: The objects *this and other are distinct.
-			sv_set& operator=(sv_set&& other) noexcept(std::is_nothrow_move_assignable_v<key_compare>);
+			sv_set& operator=(sv_set&& other) noexcept(std::is_nothrow_move_assignable<key_compare>::value){
+				if(this != &other){
+					clear();
+					::operator delete(begin_);
+					size_type finish_position = other.size();
+					size_type end_position = other.capacity();
+					begin_ = std::move(other.begin_);
+					end_ = begin_ + end_position;
+					finish_ = begin_ + finish_position;
+					other.begin_ = nullptr;
+					other.end_ = nullptr;
+					other.finish_ = nullptr;
+				}
+				return *this;
+			}
 
 			// Copy construction.
 			// Creates a new set by copying from the specified set other.
 			// Time complexity: Linear in other.size().
-			sv_set(const sv_set& other);
+			sv_set(const sv_set& other){
+				begin_ = static_cast<key_type*>(::operator new(other.size() * sizeof(key_type)));
+				end_ = begin_ + other.size();
+				try{
+					finish_ = std::uninitialized_copy(other.begin_, other.finish_, begin_);
+				}
+				catch(...){
+					::operator delete(begin_);
+					throw;
+				}
+			}
 
 			// Copy assignment.
 			// Assigns the value of the specified set other to *this.
 			// Time complexity: Linear in size() and other.size().
-			sv_set& operator=(const sv_set& other);
+			sv_set& operator=(const sv_set& other){
+				if(this != &other){
+					clear();
+					if(other.size() > capacity()) {grow(other.size());}
+					finish_ = std::uninitialized_copy(other.begin_, other.finish_, begin_);
+				}
+				return *this;
+			}
 
 			// Erases all elements in the container and destroys the container.
 			// Time complexity: Linear in size().
-			sv_set();
+			~sv_set(){
+				clear();
+				::operator delete(begin_);
+			}
 
 			// Returns the comparison object for the container.
 			// Time complexity: Constant.
-			key_compare key_comp() const;
+			key_compare key_comp() const { return compare_obj_; }
 
 			// Returns an iterator referring to the first element in the
 			// set if the set is not empty and end() otherwise.
 			// Time complexity: Constant.
-			const_iterator begin() const noexcept;
-			iterator begin() noexcept;
+			const_iterator begin() const noexcept {
+				if(finish_!=begin_){
+				       	return begin_;
+				}
+				else{
+					return end_;
+				}
+			}
+			iterator begin() noexcept {
+				if(finish_!=begin_){
+					return begin_;
+				}
+				else{
+					return end_;
+				}
+			}
 
 			// Returns an iterator referring to the fictitious
 			// one-past-the-end element for the set. Time complexity: Constant.
-			const_iterator end() const noexcept;
-			iterator end() noexcept;
+			const_iterator end() const noexcept { return end_; }
+			iterator end() noexcept { return end_; }
 
 			// Returns the number of elements in the set (i.e., the size of the set).
 			// Time complexity: Constant.
-			size_type size() const noexcept;
+			size_type size() const noexcept { return finish_-begin_; }
 
 			// Returns the number of elements for which storage is
 			// available (i.e., the capacity of the set). This value is
 			// always at least as great as size().
 			// Time complexity: Constant
-			size_type capacity() const noexcept;
+			size_type capacity() const noexcept { return end_-begin_; }
 
 			// Reserves storage in the container for at least n elements.
 			// After this function has been called with a value of n, it
@@ -123,7 +186,28 @@ namespace ra::container {
 			// container is already at least n (i.e., the capacity of
 			// the container is never reduced by this function).
 			// Time complexity: At most linear in size().
-			void reserve(size_type n);
+			void reserve(size_type n){
+				if(n > capacity()){
+					key_type* newBegin = static_cast<key_type*>(::operator new(n * sizeof(key_type)));
+					/*iterator newFinish = newBegin;
+					for(iterator i=begin_; i<finish_; ++i){
+						*newFinish = *i;
+						++newFinish;
+					}*/
+					size_type oldSize = size();
+					try{
+						std::uninitialized_copy(begin_,finish_,newBegin);
+					} catch(...){
+						::operator delete(newBegin);
+						throw;
+					}
+					::operator delete(begin_);
+					begin_ = newBegin;
+					end_ = begin_ + n;
+					finish_ = begin + oldSize;
+					//finish_ = newFinish;
+				}
+			}
 
 			// Reduces the capacity of the container to the container size.
 			// If the capacity of the container is greater than its size,
@@ -131,7 +215,21 @@ namespace ra::container {
 			// Calling this function has no effect if the capacity of the
 			// container does not exceed its size.
 			// Time complexity: At most linear in size().
-			void shrink_to_fit();
+			void shrink_to_fit(){
+				if(size() < capacity()){
+					key_type* newBegin = static_cast<key_type*>(::operator new(size() * sizeof(key_type)));
+					iterator newFinish = newBegin;
+					for(iterator i=begin_; i<finish_; ++i){
+						*newFinish = *i;
+						++newFinish;
+					}
+					clear();
+					::operator delete(begin_);
+					begin_ = newBegin;
+					end_ = begin_ + size();
+					finish_ = newFinish;
+				}
+			}
 
 			// Inserts the element x in the set. 
 			//If the element x is already in the set, no insertion is
@@ -147,7 +245,59 @@ namespace ra::container {
 			// insertion linear in either number of elements with larger
 			// keys than x (if size() < capacity()) or size()
 			// (if size() == capacity()).
-			std::pair<iterator, bool> insert(const key_type& x);
+			std::pair<iterator, bool> insert(const key_type& x){
+				key_type temp;
+				key_type hold;
+				bool search_done = false;
+				bool found_x = false;
+				iterator s_begin = begin_;
+				iterator s_finish = finish_;
+				iterator s_mid;
+				while(search_done == false){
+					s_mid = ((s_finish - s_begin)/2) + s_begin;
+					if(x == *s_mid){
+						search_done = true;
+						found_x = true;
+					}
+					else if(s_finish==s_begin){
+						search_done = true;
+					}
+					else if(x < *s_mid){
+						s_finish = s_mid - 1;
+					}
+					else{
+						s_begin = s_mid +1;
+					}
+				}
+				if(found_x){
+					return std::pair<iterator,bool>(s_mid,false);
+				}
+				else{
+					reserve(size()+1);
+					finish_ = new (static_cast<void*>(finish_)) key_type;
+					finish_ = finish_ + 1;
+					if(x < *s_mid){
+						hold = *s_mid;
+						*s_mid = x;
+						for(iterator i=(s_mid+1); i<finish_; ++i){
+							temp = *i;
+							*i = hold;
+							hold = temp;
+						}
+						return std::pair<iterator,bool>(s_mid,true);
+					}
+					else{
+						hold = *(s_mid+1);
+						*(s_mid+1) = x;
+						for(iterator i=(s_mid+2); i<finish_; ++i){
+							temp = *i;
+							*i = hold;
+							hold = temp;
+						}
+						return std::pair<iterator,bool>(s_mid+1,true);
+					}
+				}
+			}
 
 			// Erases the element referenced by pos from the container.
 			// Returns an iterator referring to the element following the
@@ -165,13 +315,46 @@ namespace ra::container {
 			// Erases any elements in the container, yielding an empty
 			// container.
 			// Time complexity: Linear in size().
-			void clear() noexcept;
+			void clear() noexcept{
+				if(size()){
+					std::destroy(begin_,finish_);
+					finish_ = begin_;
+				}
+			}
 
 			// Searches the container for an element with the key k.
 			// If an element is found, an iterator referencing the element
 			// is returned; otherwise, end() is returned.
 			// Time complexity: Logarithmic.
-			iterator find(const key_type& k);
+			iterator find(const key_type& k){
+				bool search_done = false;
+				bool found_k = false;
+				iterator s_begin = begin_;
+				iterator s_finish = finish_;
+				iterator s_mid;
+				while(search_done == false){
+					s_mid = ((s_finish - s_begin)/2) + s_begin;
+					if(k == *s_mid){
+						search_done = true;
+						found_k = true;
+					}
+					else if(s_finish==s_begin){
+						search_done = true;
+					}
+					else if(k < *s_mid){
+						s_finish = s_mid - 1;
+					}
+					else{
+						s_begin = s_mid +1;
+					}
+				}
+				if(found_k){
+					return s_mid;
+				}
+				else{
+					return end();
+				}
+			}
 			const_iterator find(const key_type& k) const;
 
 		private:
