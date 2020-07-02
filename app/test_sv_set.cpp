@@ -6,6 +6,7 @@ int main(){
 	using std::cout;
 	using std::endl;
 	using set = typename ra::container::sv_set<int>;
+	using ourange = typename ra::container::sv_set<int>::ordered_and_unique_range;
 	// Test Default constructor
 	set obj_A;
 	// Test Move constructor and move assignment
@@ -34,4 +35,12 @@ int main(){
 	// Test clear
 	obj_E.clear();
 	cout<<(obj_E.size())<<" "<<(obj_E.capacity())<<endl;
+	// Test constructor with range of values given
+	int buf_1[] = {6,3,5,4,7,3,1,4,2,6,9};
+	set obj_F(ourange(),buf_1,11);
+	cout<<(obj_F.size())<<" "<<(obj_F.capacity())<<endl;
+	for(int i=0; i<(obj_F.size()); ++i){
+		cout<<(*(obj_F.begin()+i))<<" ";
+	}
+	cout<<endl;
 }

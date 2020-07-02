@@ -63,10 +63,10 @@ namespace ra::container {
 			// Note: The type InputIterator must meet the requirements of
 			// an input iterator.
 			template <class InputIterator>
-			sv_set(ordered_and_unique_range, InputIterator first, std::size_t n){
-				begin_ = static_cast<key_type*>(::operator new(n * sizeof(key_type)));
-				end_ = begin_ + n;
-				// MIGHT NEED TO USE INSERT
+			sv_set(ordered_and_unique_range, InputIterator first, std::size_t n) : begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {
+				for(std::size_t i=0; i<n; ++i){
+					insert(*(first+i));
+				}
 			}
 
 			// Move construction.
@@ -286,7 +286,11 @@ namespace ra::container {
 					return std::pair<iterator,bool>(s_mid,false);
 				}
 				else{
-					if(capacity()==size()){reserve(size()+size_type(1));}
+					if(capacity()==size()){
+						size_type s_mid_pos = s_mid - begin_;
+						reserve(size()+size_type(1));
+						s_mid = begin_ + s_mid_pos;
+					}
 					if(begin_!=finish_){
 						finish_ = new (static_cast<void*>(finish_)) key_type;
 						finish_ = finish_ + size_type(1);
