@@ -332,12 +332,40 @@ namespace ra::container {
 			// end() otherwise.
 			// Time complexity: Linear in number of elements with larger
 			// keys than x.
-			iterator erase(const_iterator pos);
+			iterator erase(const_iterator pos){
+				if(pos < (finish_-1)){
+					size_type pos_s = pos - begin_;
+					for(size_type i=pos_s; i<(size()-1); ++i){
+						*(begin_+i) = *(begin_+i+1);
+					}
+					(finish_-1)->~Key();
+					finish_ = finish_ - 1;
+					return (begin_ + pos_s);
+				}
+				else if(pos == (finish_-1)){
+					pos->~Key();
+					finish_ = finish_ - 1;
+					return finish_;
+				}
+				else{
+					return finish_;
+				}
+			}
 
 			// Swaps the contents of the container with the contents of the
 			// container x.
 			// Time complexity: Constant.
-			void swap(sv_set& x) noexcept(std::is_nothrow_swappable_v<key_compare>);
+			void swap(sv_set& x) noexcept(std::is_nothrow_swappable_v<key_compare>){
+				iterator temp_begin = begin_;
+				iterator temp_finish = finish_;
+				iterator temp_end = end_;
+				begin_ = x.begin_;
+				finish_ = x.finish_;
+				end_ = x.end_;
+				x.begin_ = temp_begin;
+				x.finish_ = temp_finish;
+				x.end_ = temp_end;
+			}
 
 			// Erases any elements in the container, yielding an empty
 			// container.
@@ -373,10 +401,10 @@ namespace ra::container {
 							search_done = true;
 						}
 						else if(compare_obj_(k,*s_mid)){
-							s_finish = s_mid - size_type(1);
+							s_finish = s_mid; //- size_type(1);
 						}
 						else{
-							s_begin = s_mid + size_type(1);
+							s_begin = s_mid; //+ size_type(1);
 						}
 					}
 				}
@@ -405,10 +433,10 @@ namespace ra::container {
 							search_done = true;
 						}
 						else if(compare_obj_(k,*s_mid)){
-							s_finish = s_mid - size_type(1);
+							s_finish = s_mid; //- size_type(1);
 						}
 						else{
-							s_begin = s_mid + size_type(1);
+							s_begin = s_mid; // + size_type(1);
 						}
 					}
 				}

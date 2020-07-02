@@ -26,6 +26,7 @@ int main(){
 	obj_E.insert(7);
 	obj_E.insert(2);
 	obj_E.insert(5);
+	set obj_EE(obj_E);
 	// Test begin, finish,end,size,and capacity
 	cout<<(*(obj_E.begin()))<<" "<<(*(obj_E.begin()+1))<<" "<<(*(obj_E.begin()+2))<<endl;
 	cout<<(obj_E.size())<<" "<<(obj_E.capacity())<<endl;
@@ -49,4 +50,27 @@ int main(){
 	// Test constant find
 	const set obj_G(obj_F);
 	cout<<(*(obj_G.find(7)))<<endl;
+	// Test erase
+	cout<<(obj_F.size())<<endl;
+	obj_F.erase(obj_F.find(3));
+	for(int i=0; i<(obj_F.size()); ++i){
+		cout<<(*(obj_F.begin()+i))<<" ";
+	}
+	cout<<endl;
+	cout<<(obj_F.size())<<endl;
+	// Test swap
+	obj_F.swap(obj_EE);
+	for(int i=0; i<(obj_EE.size()); ++i){
+		cout<<(*(obj_EE.begin()+i))<<" ";
+	}
+	cout<<endl;
+	for(int i=0; i<(obj_F.size()); ++i){
+		cout<<(*(obj_F.begin()+i))<<" ";
+	}
+	cout<<endl;
+
+
+
+
+
 }
