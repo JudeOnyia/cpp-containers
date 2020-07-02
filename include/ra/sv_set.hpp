@@ -47,7 +47,7 @@ namespace ra::container {
 			// with a capacity of zero (i.e., no allocated storage for
 			// elements).
 			// Time complexity: Constant.
-			sv_set() noexcept(std::is_nothrow_default_constructible<key_compare>::value) : buffer_(nullptr), begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {}
+			sv_set() noexcept(std::is_nothrow_default_constructible<key_compare>::value) : begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {}
 
 			// Create a set consisting of the n elements in the
 			// range starting at first, where the elements in the range
@@ -196,7 +196,9 @@ namespace ra::container {
 					}*/
 					size_type oldSize = size();
 					try{
-						std::uninitialized_copy(begin_,finish_,newBegin);
+						if(begin_!=nullptr && end_!=nullptr && finish_!=nullptr){
+							std::uninitialized_copy(begin_,finish_,newBegin);
+						}
 					} catch(...){
 						::operator delete(newBegin);
 						throw;
@@ -204,7 +206,7 @@ namespace ra::container {
 					::operator delete(begin_);
 					begin_ = newBegin;
 					end_ = begin_ + n;
-					finish_ = begin + oldSize;
+					finish_ = begin_ + oldSize;
 					//finish_ = newFinish;
 				}
 			}
@@ -218,16 +220,25 @@ namespace ra::container {
 			void shrink_to_fit(){
 				if(size() < capacity()){
 					key_type* newBegin = static_cast<key_type*>(::operator new(size() * sizeof(key_type)));
-					iterator newFinish = newBegin;
+					/*iterator newFinish = newBegin;
 					for(iterator i=begin_; i<finish_; ++i){
 						*newFinish = *i;
 						++newFinish;
 					}
-					clear();
+					clear();*/
+					size_type oldSize = size();
+					try{
+						if(begin_!=nullptr && end_!=nullptr && finish_!=nullptr){
+							std::uninitialized_copy(begin_,finish_,newBegin);
+						}
+					} catch(...){
+						::operator delete(newBegin);
+						throw;
+					}
 					::operator delete(begin_);
 					begin_ = newBegin;
+					finish_ = begin_+oldSize;
 					end_ = begin_ + size();
-					finish_ = newFinish;
 				}
 			}
 
@@ -253,48 +264,58 @@ namespace ra::container {
 				iterator s_begin = begin_;
 				iterator s_finish = finish_;
 				iterator s_mid;
-				while(search_done == false){
-					s_mid = ((s_finish - s_begin)/2) + s_begin;
-					if(x == *s_mid){
-						search_done = true;
-						found_x = true;
-					}
-					else if(s_finish==s_begin){
-						search_done = true;
-					}
-					else if(x < *s_mid){
-						s_finish = s_mid - 1;
-					}
-					else{
-						s_begin = s_mid +1;
+				if(begin_!=finish_){
+					while(search_done == false){
+						s_mid = ((s_finish - s_begin)/2) + s_begin;
+						if(x == *s_mid){
+							search_done = true;
+							found_x = true;
+						}
+						else if(s_mid==s_begin){
+							search_done = true;
+						}
+						else if(x < *s_mid){
+							s_finish = s_mid - size_type(1);
+						}
+						else{
+							s_begin = s_mid + size_type(1);
+						}
 					}
 				}
 				if(found_x){
 					return std::pair<iterator,bool>(s_mid,false);
 				}
 				else{
-					reserve(size()+1);
-					finish_ = new (static_cast<void*>(finish_)) key_type;
-					finish_ = finish_ + 1;
-					if(x < *s_mid){
-						hold = *s_mid;
-						*s_mid = x;
-						for(iterator i=(s_mid+1); i<finish_; ++i){
-							temp = *i;
-							*i = hold;
-							hold = temp;
+					if(capacity()==size()){reserve(size()+size_type(1));}
+					if(begin_!=finish_){
+						finish_ = new (static_cast<void*>(finish_)) key_type;
+						finish_ = finish_ + size_type(1);
+						if(x < *s_mid){
+							hold = *s_mid;
+							*s_mid = x;
+							for(iterator i=(s_mid+size_type(1)); i<finish_; ++i){
+								temp = *i;
+								*i = hold;
+								hold = temp;
+							}
+							return std::pair<iterator,bool>(s_mid,true);
 						}
-						return std::pair<iterator,bool>(s_mid,true);
+						else{
+							hold = *(s_mid+size_type(1));
+							*(s_mid+size_type(1)) = x;
+							for(iterator i=(s_mid+size_type(2)); i<finish_; ++i){
+								temp = *i;
+								*i = hold;
+								hold = temp;
+							}
+							return std::pair<iterator,bool>(s_mid+size_type(1),true);
+						}
 					}
 					else{
-						hold = *(s_mid+1);
-						*(s_mid+1) = x;
-						for(iterator i=(s_mid+2); i<finish_; ++i){
-							temp = *i;
-							*i = hold;
-							hold = temp;
-						}
-						return std::pair<iterator,bool>(s_mid+1,true);
+						finish_ = new (static_cast<void*>(finish_)) key_type;
+						finish_ = finish_ + size_type(1);
+						*begin_ = x;
+						return std::pair<iterator,bool>(begin_,true);
 					}
 				}
 			}
@@ -317,7 +338,10 @@ namespace ra::container {
 			// Time complexity: Linear in size().
 			void clear() noexcept{
 				if(size()){
-					std::destroy(begin_,finish_);
+					for(iterator i=begin_; i<finish_; ++i){
+						i->~Key();
+					}
+					//std::destroy(begin_,finish_);
 					finish_ = begin_;
 				}
 			}
@@ -358,7 +382,7 @@ namespace ra::container {
 			const_iterator find(const key_type& k) const;
 
 		private:
-			char* buffer_;
+			//char* buffer_;
 			key_type* begin_;
 			key_type* end_;
 			key_type* finish_;
