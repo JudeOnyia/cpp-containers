@@ -74,7 +74,7 @@ namespace ra::container {
 			// After construction, the source set (i.e., other) is
 			// guaranteed to be empty.
 			// Time complexity: Constant.
-			sv_set(sv_set&& other) noexcept(std::is_nothrow_move_constructible<key_compare>::value){
+			sv_set(sv_set&& other) noexcept(std::is_nothrow_move_constructible<key_compare>::value) : compare_obj_(key_compare()) {
 				begin_ = other.begin_;
 				other.begin_ = nullptr;
 				end_ = other.end_;
@@ -108,7 +108,7 @@ namespace ra::container {
 			// Copy construction.
 			// Creates a new set by copying from the specified set other.
 			// Time complexity: Linear in other.size().
-			sv_set(const sv_set& other){
+			sv_set(const sv_set& other) : compare_obj_(key_compare()) {
 				begin_ = static_cast<key_type*>(::operator new(other.size() * sizeof(key_type)));
 				end_ = begin_ + other.size();
 				try{
@@ -267,18 +267,19 @@ namespace ra::container {
 				if(begin_!=finish_){
 					while(search_done == false){
 						s_mid = ((s_finish - s_begin)/2) + s_begin;
-						if(x == *s_mid){
+						if(!compare_obj_(x,*s_mid) && !compare_obj_(*s_mid,x)){
 							search_done = true;
 							found_x = true;
 						}
 						else if(s_mid==s_begin){
+						//else if(s_mid==s_begin || s_mid==(s_finish-size_type(1))){
 							search_done = true;
 						}
-						else if(x < *s_mid){
-							s_finish = s_mid - size_type(1);
+						else if(compare_obj_(x,*s_mid)){
+							s_finish = s_mid; // - size_type(1);
 						}
 						else{
-							s_begin = s_mid + size_type(1);
+							s_begin = s_mid; //+ size_type(1);
 						}
 					}
 				}
@@ -292,9 +293,10 @@ namespace ra::container {
 						s_mid = begin_ + s_mid_pos;
 					}
 					if(begin_!=finish_){
+						if(compare_obj_(x,*begin_)){ s_mid = begin_; }
 						finish_ = new (static_cast<void*>(finish_)) key_type;
 						finish_ = finish_ + size_type(1);
-						if(x < *s_mid){
+						if(compare_obj_(x,*s_mid)){
 							hold = *s_mid;
 							*s_mid = x;
 							for(iterator i=(s_mid+size_type(1)); i<finish_; ++i){
@@ -360,20 +362,22 @@ namespace ra::container {
 				iterator s_begin = begin_;
 				iterator s_finish = finish_;
 				iterator s_mid;
-				while(search_done == false){
-					s_mid = ((s_finish - s_begin)/2) + s_begin;
-					if(k == *s_mid){
-						search_done = true;
-						found_k = true;
-					}
-					else if(s_finish==s_begin){
-						search_done = true;
-					}
-					else if(k < *s_mid){
-						s_finish = s_mid - 1;
-					}
-					else{
-						s_begin = s_mid +1;
+				if(begin_!=finish_){
+					while(search_done == false){
+						s_mid = ((s_finish - s_begin)/2) + s_begin;
+						if(!compare_obj_(k,*s_mid) && !compare_obj_(*s_mid,k)){
+							search_done = true;
+							found_k = true;
+						}
+						else if(s_mid==s_begin){
+							search_done = true;
+						}
+						else if(compare_obj_(k,*s_mid)){
+							s_finish = s_mid - size_type(1);
+						}
+						else{
+							s_begin = s_mid + size_type(1);
+						}
 					}
 				}
 				if(found_k){
@@ -383,7 +387,38 @@ namespace ra::container {
 					return end();
 				}
 			}
-			const_iterator find(const key_type& k) const;
+
+			const_iterator find(const key_type& k) const{
+				bool search_done = false;
+				bool found_k = false;
+				iterator s_begin = begin_;
+				iterator s_finish = finish_;
+				iterator s_mid;
+				if(begin_!=finish_){
+					while(search_done == false){
+						s_mid = ((s_finish - s_begin)/2) + s_begin;
+						if(!compare_obj_(k,*s_mid) && !compare_obj_(*s_mid,k)){
+							search_done = true;
+							found_k = true;
+						}
+						else if(s_mid==s_begin){
+							search_done = true;
+						}
+						else if(compare_obj_(k,*s_mid)){
+							s_finish = s_mid - size_type(1);
+						}
+						else{
+							s_begin = s_mid + size_type(1);
+						}
+					}
+				}
+				if(found_k){
+					return s_mid;
+				}
+				else{
+					return end();
+				}
+			}
 
 		private:
 			//char* buffer_;

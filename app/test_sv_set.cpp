@@ -1,12 +1,15 @@
 #include"ra/sv_set.hpp"
 #include<iostream>
 #include<utility>
+#include<functional>
 
 int main(){
 	using std::cout;
 	using std::endl;
 	using set = typename ra::container::sv_set<int>;
 	using ourange = typename ra::container::sv_set<int>::ordered_and_unique_range;
+	//using set = typename ra::container::sv_set<int, std::greater<int>>;
+	//using ourange = typename ra::container::sv_set<int, std::greater<int>>::ordered_and_unique_range;
 	// Test Default constructor
 	set obj_A;
 	// Test Move constructor and move assignment
@@ -43,4 +46,7 @@ int main(){
 		cout<<(*(obj_F.begin()+i))<<" ";
 	}
 	cout<<endl;
+	// Test constant find
+	const set obj_G(obj_F);
+	cout<<(*(obj_G.find(7)))<<endl;
 }
