@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/judeonyia/Documents/ECE596C_Assignments/ECE596C_Assgn_4/cpp_containers-JudeOnyia/cktmp/package-set_sane/source/app/test_sv_set.cpp
+iostream
+-
+type_traits
+-
+functional
+-
+cstdint
+-
+utility
+-
+ra/sv_set.hpp
+-
+iterator
+-
+forward_list
+-
+
+/home/judeonyia/Documents/ECE596C_Assignments/ECE596C_Assgn_4/cpp_containers-JudeOnyia/cktmp/package-set_sane/source/include/ra/sv_set.hpp
+stddef.h
+-
+functional
+-
+memory
+-
+utility
+-
+algorithm
+-
+

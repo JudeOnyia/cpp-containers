@@ -1,0 +1,4 @@
+Scanning dependencies of target test_sv_set
+[ 50%] Building CXX object CMakeFiles/test_sv_set.dir/app/test_sv_set.cpp.o
+[100%] Linking CXX executable test_sv_set
+[100%] Built target test_sv_set

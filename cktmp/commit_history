@@ -1,0 +1,106 @@
+commit ba7e7feadea121cd95fb57997a1bd7f18fe44262
+Author: JudeOnyia <60678029+JudeOnyia@users.noreply.github.com>
+Date:   Tue Jun 30 00:49:54 2020 -0700
+
+    First Commit. Set up files and folders.
+
+commit e8df5dcf466b4ec67004979844b8a56c25296462
+Author: JudeOnyia <60678029+JudeOnyia@users.noreply.github.com>
+Date:   Tue Jun 30 13:19:04 2020 -0700
+
+    Added Sanitizer.cmake for ASAN and LSAN
+
+commit d0bc14de4eda04a80e36894683d4510bcacc95e3
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Tue Jun 30 14:40:54 2020 -0700
+
+    1) Wrote default constructor for set
+
+commit 38b52c70719ff588d02499b3db8fbcefaa1a6472
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Wed Jul 1 02:56:34 2020 -0700
+
+    1) Wrote default empty constructor
+    2) Wrote Move constructor and move assignment
+    3) Wrote Copy constructor and copy assignement
+    4) Wrote destructor, key_comp, begin and end functions
+    5) Wrote size, capacity, reserve and shrink functions
+    6) Attempted insert, clear, and find functions
+
+commit 3cafbf8ad966f16cd6329494050f2699b00a9987
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Wed Jul 1 18:53:36 2020 -0700
+
+    1) Made corrections in insert function implementation
+    2) Made corrections in find function implementation
+    3) Wrote more tests
+
+commit baabea4f6a09905e09cae2387b49ed7af6bfbad8
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Wed Jul 1 19:48:29 2020 -0700
+
+    1) Fixed a flaw in insert function
+    2) Wrote constructor that takes in a range
+
+commit ba332fda1176af52faee7ca17df07d5d7c297483
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Thu Jul 2 00:01:52 2020 -0700
+
+    1) Tested and fixed in regard to using a different comparing object
+    2) Wrote const find function
+
+commit f0becd441d845cd81bdf14c106dff6ca3eb20623
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Thu Jul 2 01:50:25 2020 -0700
+
+    1) Wrote erase function
+    2) Wrote swap function
+
+commit 48b76f05d6cae0ead8953467afc5067864e69882
+Author: JudeOnyia <60678029+JudeOnyia@users.noreply.github.com>
+Date:   Thu Jul 2 02:45:09 2020 -0700
+
+    Set up for intrusive doubly link list class
+
+commit f842067f2d0263b41e798c7d04e0eff081d96386
+Author: JudeOnyia <60678029+JudeOnyia@users.noreply.github.com>
+Date:   Thu Jul 2 13:31:45 2020 -0700
+
+    Added Parent_from_member function
+
+commit c6a28ecc27ec734235d62edd6f150076a2c82516
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Thu Jul 2 21:10:52 2020 -0700
+
+    1) Added members to list_hook
+    2) Wrote default constr, destr,move constr, and move assignment of list
+    3) Wrote size, insert, clear, begin and end functions of list
+
+commit 81b82c16e37521da760b1074462299e294124583
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Thu Jul 2 21:14:39 2020 -0700
+
+    0) Without tmp folder
+    1) Added members to list_hook
+    2) Wrote default constr, destr,move constr, and move assignment of list
+    3) Wrote size, insert, clear, begin and end functions of list
+
+commit f452b87577ac6071367453a5fb42b50a1a4f3d67
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Fri Jul 3 01:20:19 2020 -0700
+
+    1) Wrote list_iterator class
+    2) Modified functions that used list_iterator
+
+commit dc5a4c0eab9ea54321d179b28eeeda0167e856ca
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Fri Jul 3 02:09:56 2020 -0700
+
+    1) Performed tests on member functions made so far
+
+commit 049e9257cfc21c36107b991a175d6bc628a6067f
+Author: Jude Onyia <judeonyia10@gmail.com>
+Date:   Fri Jul 3 05:10:31 2020 -0700
+
+    1) Wrote swap member function
+    2) Wrote push abck and pop back member functions

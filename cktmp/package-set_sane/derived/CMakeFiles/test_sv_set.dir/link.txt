@@ -1,0 +1,1 @@
+/home/frodo/public/ugls_lab-4.0.70/bin/c++     CMakeFiles/test_sv_set.dir/app/test_sv_set.cpp.o  -o test_sv_set 

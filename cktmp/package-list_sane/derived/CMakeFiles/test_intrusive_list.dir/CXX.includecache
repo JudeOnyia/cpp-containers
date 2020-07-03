@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/judeonyia/Documents/ECE596C_Assignments/ECE596C_Assgn_4/cpp_containers-JudeOnyia/cktmp/package-list_sane/source/app/test_intrusive_list.cpp
+iostream
+-
+type_traits
+-
+ra/intrusive_list.hpp
+-
+iterator
+-
+
+/home/judeonyia/Documents/ECE596C_Assignments/ECE596C_Assgn_4/cpp_containers-JudeOnyia/cktmp/package-list_sane/source/include/ra/intrusive_list.hpp
+parent_from_member.hpp
+/home/judeonyia/Documents/ECE596C_Assignments/ECE596C_Assgn_4/cpp_containers-JudeOnyia/cktmp/package-list_sane/source/include/ra/parent_from_member.hpp
+utility
+-
+
+/home/judeonyia/Documents/ECE596C_Assignments/ECE596C_Assgn_4/cpp_containers-JudeOnyia/cktmp/package-list_sane/source/include/ra/parent_from_member.hpp
+cstddef
+-
+
