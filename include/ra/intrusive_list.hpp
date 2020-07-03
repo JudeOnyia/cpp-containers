@@ -26,22 +26,67 @@ namespace ra::intrusive {
 			~list_hook() = default;
 			template<class T, list_hook T::* Hook>
 			friend class list;
+			friend class list_iterator;
 		private:
 			list_hook* next_;
 			list_hook* prev_;
 	};
 
-	/*class list_iterator{
-		public:
-			cd
-		private:
-			list_hook* node_;
-	};*/
-
 	// Intrusive doubly-linked list (with sentinel node).
 	template <class T, list_hook T::* Hook>
 	class list {
 		public:
+			class list_iterator{
+				public:
+					list_iterator() : ptr_(nullptr) {}
+					list_iterator(list_hook* ptrval) : ptr_(ptrval) {}
+					~list_iterator() = default;
+					list_iterator(const list_iterator& other) : ptr_(other.ptr_) {}
+					list_iterator& operator=(const list_iterator& other) {
+						ptr_ = other.ptr_;
+					}
+					list_iterator& operator=(list_hook* otherPtr) {
+						ptr_ = otherPtr;
+					}
+					bool operator==(const list_iterator& other) const {
+						return (ptr_==(other.ptr_));
+					}
+					bool operator==(list_hook* otherPtr) const {
+						return (ptr_==otherPtr);
+					}
+					bool operator!=(const list_iterator& other) const {
+						return (ptr_!=(other.ptr_));
+					}
+					bool operator!=(list_hook* otherPtr) const {
+						return (ptr_!=otherPtr);
+					}
+					T* operator->() const {
+						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
+						return el_ptr;
+					}
+
+					list_iterator operator++(){
+						ptr_ = ptr_->next_;
+						return *this;
+					}
+					list_iterator operator++(int){
+						list_iterator oldIter(*this);
+						ptr_ = ptr_->next_;
+						return oldIter;
+					}
+					list_iterator operator--(){
+						ptr_ = ptr_->prev_;
+						return *this;
+					}
+					list_iterator operator--(int){
+						list_iterator oldIter(*this);
+						ptr_ = ptr_->prev_;
+						return oldIter;
+					}
+					list_hook* getPtr() const { return ptr_; }
+				private:
+					list_hook* ptr_;
+			};
 
 			// The type of the elements in the list.
 			using value_type = T;
@@ -60,14 +105,14 @@ namespace ra::intrusive {
 			// bidirectional iterator.
 			// The Boost Iterator library may be used to implement this
 			// type.
-			using iterator = T*; // ...........
+			using iterator = list_iterator;
 			
 			// The non-mutating (bidirectional) iterator type for the list.
 			// This type must provide all of the functionality of a
 			// bidirectional iterator.
 			// The Boost Iterator library may be used to implement this
 			// type.
-			using const_iterator = const T*; // .........
+			using const_iterator = const list_iterator;
 
 			// An unsigned integral type used to represent sizes.
 			using size_type = std::size_t;
@@ -147,18 +192,19 @@ namespace ra::intrusive {
 					(value.*hook_ptr).prev_ = &(sent_node_);
 				}
 				else{
-					list_hook* next_hook = &(pos->*hook_ptr);
+					list_hook* next_hook = pos.getPtr();
 					list_hook* current_hook = &(value.*hook_ptr);
-					list_hook* prev_hook = (pos->*hook_ptr).prev_;
+					list_hook* prev_hook = next_hook->prev_;
 					prev_hook->next_ = current_hook;
 					current_hook->prev_ = prev_hook;
 					current_hook->next_ = next_hook;
 					next_hook->prev_ = current_hook;	
 				}
 				++size_;
-				iterator elmnt_ptr = &value;
+				list_hook* return_hook = &(value.*hook_ptr);
+				iterator return_ptr = iterator(return_hook);
 				//iterator elmnt_ptr = ra::util::parent_from_member<value_type,list_hook>(current_hook,hook_ptr);
-				return elmnt_ptr;
+				return return_ptr;
 			}
 
 			// Erases the element in the list at the position specified by the
@@ -181,7 +227,11 @@ namespace ra::intrusive {
 			// Returns a reference to the last element in the list.
 			// Precondition: The list is not empty.
 			// Time complexity: Constant.
-			reference back();
+			reference back(){
+				list_hook* last_hook = sent_node_.prev_;
+				value_type* last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
+				return (*last_element);
+			}
 			const_reference back() const;
 
 			// Erases any elements from the list, yielding an empty list.
@@ -207,9 +257,8 @@ namespace ra::intrusive {
 					return end();
 				}
 				else{
-					list_hook* first_hook = sent_node_.next_;
-					iterator first_element = ra::util::parent_from_member<value_type,list_hook>(first_hook,hook_ptr);
-					return first_element;
+					iterator first_hook = sent_node_.next_;
+					return first_hook;
 				}
 			}
 
@@ -217,16 +266,18 @@ namespace ra::intrusive {
 			// element.
 			// Time complexity: Constant.
 			const_iterator end() const {
-			       const list_hook* last_hook = sent_node_.prev_;
-			       const iterator last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
+			       /*const iterator last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
 			       const iterator end_element = last_element + 1;
-			       return end_element; 
+			       return end_element;*/
+			       return &sent_node_;	
 			}
 			iterator end() {
-				list_hook* last_hook = sent_node_.prev_;
+				/*list_hook* last_hook = sent_node_.prev_;
 				iterator last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
 				iterator end_element = last_element + 1;
 				return end_element;
+				*/
+				return &sent_node_;
 			}
 
 		private:

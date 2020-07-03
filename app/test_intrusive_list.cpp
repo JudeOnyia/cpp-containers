@@ -14,6 +14,7 @@ int main() {
 	using std::cout;
 	using std::endl;
 	using riw = typename ri::list<Widget, &Widget::hook>;
+	using itr = typename ri::list<Widget, &Widget::hook>::list_iterator;
 	std::vector<Widget> storage;
 	for(int i=0; i<10; ++i){
 		storage.push_back(Widget(i));
@@ -23,17 +24,18 @@ int main() {
 	cout<<(obj_A.size())<<endl;
 	// Test insert and begin
 	Widget* wp = storage.data();
-	Widget* ip = obj_A.begin();
+	itr ip = obj_A.begin();
 	for(int i=0; i<10; ++i){
-		ip = obj_A.insert(ip,*wp);
+		obj_A.insert(ip,*wp);
+		--ip;
 		++wp;
 	}
 	cout<<(obj_A.size())<<endl;
-	/*ip = obj_A.begin();
-	for(int i=0; i<10; ++i){
-		cout<<(*ip)<<" ";
-		ip = 
-	}*/
+	//itr iz = obj_A.begin();
+	for(itr i=(--(obj_A.end())); i!=(obj_A.end()); --i){
+		cout<<(i->value)<<" ";
+	}
+	cout<<endl;
 	
 
 	/*
