@@ -2,6 +2,7 @@
 #include<vector>
 #include<iostream>
 #include<utility>
+#include <type_traits>
 
 namespace ri = ra::intrusive;
 
@@ -12,15 +13,23 @@ struct Widget {
 	ri::list_hook hook2;
 };
 
-void print_list(ri::list<Widget, &Widget::hook>& obj){
-	for(ri::list<Widget, &Widget::hook>::list_iterator i=(obj.begin()); i!=(obj.end()); ++i){
+using riw = ri::list<Widget, &Widget::hook>;
+using riw2 = ri::list<Widget, &Widget::hook2>;
+using itr = ri::list<Widget, &Widget::hook>::list_iterator;
+//using itr = std::reverse_iterator<itr_mine, std::bidirectional_iterator_tag>;
+using itr2 = ri::list<Widget, &Widget::hook2>::list_iterator;
+//using itr2 = std::reverse_iterator<itr2_mine, std::bidirectional_iterator_tag>;
+
+
+void print_list(riw& obj){
+	for(itr i=(obj.begin()); i!=(obj.end()); ++i){
 		std::cout<<(i->value)<<" ";
 	}
 	std::cout<<std::endl;
 }
 
-void print_list2(ri::list<Widget, &Widget::hook2>& obj){
-	for(ri::list<Widget, &Widget::hook2>::list_iterator i=(obj.begin()); i!=(obj.end()); ++i){
+void print_list2(riw2& obj){
+	for(itr2 i=(obj.begin()); i!=(obj.end()); ++i){
 		std::cout<<(i->value)<<" ";
 	}
 	std::cout<<std::endl;
@@ -42,10 +51,6 @@ void print_list2(ri::list<Widget, &Widget::hook2>& obj){
 int main() {
 	using std::cout;
 	using std::endl;
-	using riw = typename ri::list<Widget, &Widget::hook>;
-	using riw2 = typename ri::list<Widget, &Widget::hook2>;
-	using itr = typename ri::list<Widget, &Widget::hook>::list_iterator;
-	using itr2 = typename ri::list<Widget, &Widget::hook2>::list_iterator;
 	std::vector<Widget> storage;
 	for(int i=9; i>=0; --i){
 		storage.push_back(Widget(i));

@@ -3,6 +3,9 @@
 
 #include"parent_from_member.hpp"
 #include<utility>
+#include<iterator>
+#include <type_traits>
+#include<vector>
 
 namespace ra::intrusive {
 
@@ -37,8 +40,14 @@ namespace ra::intrusive {
 	template <class T, list_hook T::* Hook>
 	class list {
 		public:
-			class list_iterator{
+			typedef typename std::vector<T>::iterator itr_impl;
+			class list_iterator : public itr_impl {
 				public:
+					typedef typename std::iterator_traits<itr_impl>::value_type value_type;
+					typedef std::bidirectional_iterator_tag iterator_category;
+					typedef typename std::iterator_traits<itr_impl>::difference_type difference_type;
+					typedef typename std::iterator_traits<itr_impl>::pointer pointer;
+					typedef typename std::iterator_traits<itr_impl>::reference reference;
 					list_iterator() : ptr_(nullptr) {}
 					list_iterator(list_hook* ptrval) : ptr_(ptrval) {}
 					list_iterator(T* ptrT) : ptr_(&(ptrT->*hook_ptr)){}
@@ -111,7 +120,7 @@ namespace ra::intrusive {
 			// bidirectional iterator.
 			// The Boost Iterator library may be used to implement this
 			// type.
-			using iterator = list_iterator;
+			using iterator = list_iterator;//std::reverse_iterator<list_iterator>;
 			
 			// The non-mutating (bidirectional) iterator type for the list.
 			// This type must provide all of the functionality of a
