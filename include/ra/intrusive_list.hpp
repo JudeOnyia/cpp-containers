@@ -2,6 +2,7 @@
 #define INTRUSIVELISTHPP
 
 #include"parent_from_member.hpp"
+#include<utility>
 
 namespace ra::intrusive {
 
@@ -40,6 +41,7 @@ namespace ra::intrusive {
 				public:
 					list_iterator() : ptr_(nullptr) {}
 					list_iterator(list_hook* ptrval) : ptr_(ptrval) {}
+					list_iterator(T* ptrT) : ptr_(&(ptrT->*hook_ptr)){}
 					~list_iterator() = default;
 					list_iterator(const list_iterator& other) : ptr_(other.ptr_) {}
 					list_iterator& operator=(const list_iterator& other) {
@@ -169,6 +171,7 @@ namespace ra::intrusive {
 				other.sent_node_.next_ = &(other.sent_node_);
 				other.sent_node_.prev_ = &(other.sent_node_);
 				other.size_ = size_type(0);
+				return *this;
 			}
 
 			// Do not allow the copying of lists.
@@ -178,7 +181,11 @@ namespace ra::intrusive {
 			// Swaps the elements of *this and x.
 			// Swapping the elements of a list with itself has no effect.
 			// Time complexity: Constant.
-			void swap(list& x);
+			void swap(list& x){
+				list temp(std::move(x));
+				x = std::move(*this);
+				*this = std::move(temp);
+			}
 
 			// Returns the number of elements in the list.
 			// Time complexity: Constant.
@@ -217,16 +224,36 @@ namespace ra::intrusive {
 			// is returned if such an element exists; otherwise, end() is
 			// returned.
 			// Time complexity: Constant.
-			iterator erase(iterator pos);
+			iterator erase(iterator pos){
+				if(size_ == size_type(0)){
+					return end();
+				}
+				else{
+					list_hook* current_hook = pos.getPtr();
+					list_hook* prev_hook = current_hook->prev_;
+					list_hook* next_hook = current_hook->next_;
+					prev_hook->next_ = next_hook;
+					next_hook->prev_ = prev_hook;
+					current_hook->prev_ = current_hook;
+					current_hook->next_ = current_hook;
+					--size_;
+					return (iterator(next_hook));
+				}
+			}
 
 			// Inserts the element with the value x at the end of the list.
 			// Time complexity: Constant.
-			void push_back(value_type& x);
+			void push_back(value_type& x){
+				iterator res = insert(end(),x);
+			}
 
 			// Erases the last element in the list.
 			// Precondition: The list is not empty.
 			// Time complexity: Constant.
-			void pop_back();
+			void pop_back(){
+				iterator last = --(end());
+				iterator res = erase(last);
+			}
 
 			// Returns a reference to the last element in the list.
 			// Precondition: The list is not empty.
