@@ -14,3 +14,4 @@ include_directories(include)
 
 # Add Executable Program
 add_executable(test_sv_set app/test_sv_set.cpp)
+add_executable(test_intrusive_list app/test_intrusive_list.cpp)
