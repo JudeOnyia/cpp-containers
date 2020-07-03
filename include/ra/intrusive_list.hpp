@@ -41,6 +41,72 @@ namespace ra::intrusive {
 	template <class T, list_hook T::* Hook>
 	class list {
 		public:
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			typedef typename std::vector<T>::const_iterator const_itr_impl;
+			class list_const_iterator : public const_itr_impl {
+				public:
+					typedef typename std::iterator_traits<const_itr_impl>::value_type value_type;
+					typedef std::bidirectional_iterator_tag iterator_category;
+					typedef typename std::iterator_traits<const_itr_impl>::difference_type difference_type;
+					typedef typename std::iterator_traits<const_itr_impl>::pointer pointer;
+					typedef typename std::iterator_traits<const_itr_impl>::reference reference;
+					list_const_iterator() : ptr_(nullptr) {}
+					list_const_iterator(const list_hook* ptrval) : ptr_(ptrval) {}
+					list_const_iterator(const T* ptrT) : ptr_(&(ptrT->*hook_ptr)){}
+					~list_const_iterator() = default;
+					list_const_iterator(const list_const_iterator& other) : ptr_(other.ptr_) {}
+					list_const_iterator& operator=(const list_const_iterator& other) {
+						ptr_ = other.ptr_;
+					}
+					list_const_iterator& operator=(const list_hook* otherPtr) {
+						ptr_ = otherPtr;
+					}
+					bool operator==(const list_const_iterator& other) const {
+						return (ptr_==(other.ptr_));
+					}
+					bool operator==(const list_hook* otherPtr) const {
+						return (ptr_==otherPtr);
+					}
+					bool operator!=(const list_const_iterator& other) const {
+						return (ptr_!=(other.ptr_));
+					}
+					bool operator!=(const list_hook* otherPtr) const {
+						return (ptr_!=otherPtr);
+					}
+					T* operator->() const {
+						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
+						return el_ptr;
+					}
+					T& operator*() const{
+						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
+						return (*el_ptr);
+					}
+
+					list_const_iterator operator++(){
+						ptr_ = ptr_->next_;
+						return *this;
+					}
+					list_const_iterator operator++(int){
+						list_const_iterator oldIter(*this);
+						ptr_ = ptr_->next_;
+						return oldIter;
+					}
+					list_const_iterator operator--(){
+						ptr_ = ptr_->prev_;
+						return *this;
+					}
+					list_const_iterator operator--(int){
+						list_const_iterator oldIter(*this);
+						ptr_ = ptr_->prev_;
+						return oldIter;
+					}
+					const list_hook* getPtr() const { return ptr_; }
+				private:
+					const list_hook* ptr_;
+			};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			typedef typename std::vector<T>::iterator itr_impl;
 			class list_iterator : public itr_impl {
 				public:
@@ -107,70 +173,7 @@ namespace ra::intrusive {
 				private:
 					list_hook* ptr_;
 			};
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			typedef typename std::vector<T>::const_iterator const_itr_impl;
-			class list_const_iterator : public const_itr_impl {
-				public:
-					typedef typename std::iterator_traits<const_itr_impl>::value_type value_type;
-					typedef std::bidirectional_iterator_tag iterator_category;
-					typedef typename std::iterator_traits<const_itr_impl>::difference_type difference_type;
-					typedef typename std::iterator_traits<const_itr_impl>::pointer pointer;
-					typedef typename std::iterator_traits<const_itr_impl>::reference reference;
-					list_const_iterator() : ptr_(nullptr) {}
-					list_const_iterator(const list_hook* ptrval) : ptr_(ptrval) {}
-					list_const_iterator(const T* ptrT) : ptr_(&(ptrT->*hook_ptr)){}
-					~list_const_iterator() = default;
-					list_const_iterator(const list_const_iterator& other) : ptr_(other.ptr_) {}
-					list_const_iterator& operator=(const list_const_iterator& other) {
-						ptr_ = other.ptr_;
-					}
-					list_const_iterator& operator=(const list_hook* otherPtr) {
-						ptr_ = otherPtr;
-					}
-					bool operator==(const list_const_iterator& other) const {
-						return (ptr_==(other.ptr_));
-					}
-					bool operator==(const list_hook* otherPtr) const {
-						return (ptr_==otherPtr);
-					}
-					bool operator!=(const list_const_iterator& other) const {
-						return (ptr_!=(other.ptr_));
-					}
-					bool operator!=(const list_hook* otherPtr) const {
-						return (ptr_!=otherPtr);
-					}
-					T* operator->() const {
-						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
-						return el_ptr;
-					}
-					T& operator*() const{
-						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
-						return (*el_ptr);
-					}
 
-					list_const_iterator operator++(){
-						ptr_ = ptr_->next_;
-						return *this;
-					}
-					list_const_iterator operator++(int){
-						list_const_iterator oldIter(*this);
-						ptr_ = ptr_->next_;
-						return oldIter;
-					}
-					list_const_iterator operator--(){
-						ptr_ = ptr_->prev_;
-						return *this;
-					}
-					list_const_iterator operator--(int){
-						list_const_iterator oldIter(*this);
-						ptr_ = ptr_->prev_;
-						return oldIter;
-					}
-					const list_hook* getPtr() const { return ptr_; }
-				private:
-					const list_hook* ptr_;
-			};
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			// The type of the elements in the list.
 			using value_type = T;
