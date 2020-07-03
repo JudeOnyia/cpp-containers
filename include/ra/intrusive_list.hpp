@@ -64,6 +64,10 @@ namespace ra::intrusive {
 						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
 						return el_ptr;
 					}
+					T& operator*() const{
+						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
+						return (*el_ptr);
+					}
 
 					list_iterator operator++(){
 						ptr_ = ptr_->next_;
@@ -232,12 +236,16 @@ namespace ra::intrusive {
 				value_type* last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
 				return (*last_element);
 			}
-			const_reference back() const;
+			const_reference back() const{
+				const list_hook* last_hook = sent_node_.prev_;
+				const value_type* last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
+				return (*last_element);
+			}
 
 			// Erases any elements from the list, yielding an empty list.
 			// Time complexity: Either linear or constant.
 			void clear(){
-				list_hook* current_hook = (sent_node_.prev_)->next_;
+				/*list_hook* current_hook = (sent_node_.prev_)->next_;
 				list_hook* next_hook;
 				for(size_type i=0; i<=size_; ++i){
 					next_hook = current_hook->next_;
@@ -245,13 +253,26 @@ namespace ra::intrusive {
 					current_hook->prev_ = current_hook;
 					current_hook = next_hook;
 				}
+				*/
+				list_hook* itslf = (sent_node_.prev_)->next_;
+				sent_node_.prev_ = itslf;
+				sent_node_.next_ = itslf;
 				size_ = size_type(0);
 			}
 
 			// Returns an iterator referring to the first element in the list
 			// if the list is not empty and end() otherwise.
 			// Time complexity: Constant.
-			const_iterator begin() const;
+			const_iterator begin() const{
+				if(size_ == size_type(0)){
+					return end();
+				}
+				else{
+					const_iterator first_hook = sent_node_.next_;
+					return first_hook;
+				}
+			}
+
 			iterator begin(){
 				if(size_ == size_type(0)){
 					return end();
