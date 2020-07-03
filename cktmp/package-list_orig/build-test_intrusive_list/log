@@ -1,4 +1,0 @@
-Scanning dependencies of target test_intrusive_list
-[ 50%] Building CXX object CMakeFiles/test_intrusive_list.dir/app/test_intrusive_list.cpp.o
-[100%] Linking CXX executable test_intrusive_list
-[100%] Built target test_intrusive_list
