@@ -54,7 +54,11 @@ namespace ra::intrusive {
 					list_iterator(T* ptrT) : ptr_(&(ptrT->*hook_ptr)){}
 					~list_iterator() = default;
 					list_iterator(const list_iterator& other) : ptr_(other.ptr_) {}
+					list_iterator(const list_const_iterator& other): ptr_(other.ptr_) {}
 					list_iterator& operator=(const list_iterator& other) {
+						ptr_ = other.ptr_;
+					}
+					list_iterator& operator=(const list_const_iterator& other){
 						ptr_ = other.ptr_;
 					}
 					list_iterator& operator=(list_hook* otherPtr) {
@@ -192,7 +196,7 @@ namespace ra::intrusive {
 			// bidirectional iterator.
 			// The Boost Iterator library may be used to implement this
 			// type.
-			using const_iterator = const list_iterator;
+			using const_iterator = list_const_iterator;
 
 			// An unsigned integral type used to represent sizes.
 			using size_type = std::size_t;
