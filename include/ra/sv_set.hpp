@@ -65,7 +65,8 @@ namespace ra::container {
 			template <class InputIterator>
 			sv_set(ordered_and_unique_range, InputIterator first, std::size_t n) : begin_(nullptr), end_(nullptr), finish_(nullptr), compare_obj_(key_compare()) {
 				for(std::size_t i=0; i<n; ++i){
-					insert(*(first+i));
+					insert(*first);
+					++first;
 				}
 			}
 
@@ -126,7 +127,7 @@ namespace ra::container {
 			sv_set& operator=(const sv_set& other){
 				if(this != &other){
 					clear();
-					if(other.size() > capacity()) {grow(other.size());}
+					if(other.size() > capacity()) {reserve(other.size());}
 					finish_ = std::uninitialized_copy(other.begin_, other.finish_, begin_);
 				}
 				return *this;
@@ -189,11 +190,7 @@ namespace ra::container {
 			void reserve(size_type n){
 				if(n > capacity()){
 					key_type* newBegin = static_cast<key_type*>(::operator new(n * sizeof(key_type)));
-					/*iterator newFinish = newBegin;
-					for(iterator i=begin_; i<finish_; ++i){
-						*newFinish = *i;
-						++newFinish;
-					}*/
+					
 					size_type oldSize = size();
 					try{
 						if(begin_!=nullptr && end_!=nullptr && finish_!=nullptr){
@@ -207,7 +204,7 @@ namespace ra::container {
 					begin_ = newBegin;
 					end_ = begin_ + n;
 					finish_ = begin_ + oldSize;
-					//finish_ = newFinish;
+					
 				}
 			}
 
@@ -220,12 +217,7 @@ namespace ra::container {
 			void shrink_to_fit(){
 				if(size() < capacity()){
 					key_type* newBegin = static_cast<key_type*>(::operator new(size() * sizeof(key_type)));
-					/*iterator newFinish = newBegin;
-					for(iterator i=begin_; i<finish_; ++i){
-						*newFinish = *i;
-						++newFinish;
-					}
-					clear();*/
+					
 					size_type oldSize = size();
 					try{
 						if(begin_!=nullptr && end_!=nullptr && finish_!=nullptr){
@@ -272,14 +264,13 @@ namespace ra::container {
 							found_x = true;
 						}
 						else if(s_mid==s_begin){
-						//else if(s_mid==s_begin || s_mid==(s_finish-size_type(1))){
 							search_done = true;
 						}
 						else if(compare_obj_(x,*s_mid)){
-							s_finish = s_mid; // - size_type(1);
+							s_finish = s_mid;
 						}
 						else{
-							s_begin = s_mid; //+ size_type(1);
+							s_begin = s_mid; 
 						}
 					}
 				}
@@ -375,7 +366,7 @@ namespace ra::container {
 					for(iterator i=begin_; i<finish_; ++i){
 						i->~Key();
 					}
-					//std::destroy(begin_,finish_);
+					
 					finish_ = begin_;
 				}
 			}
@@ -401,10 +392,10 @@ namespace ra::container {
 							search_done = true;
 						}
 						else if(compare_obj_(k,*s_mid)){
-							s_finish = s_mid; //- size_type(1);
+							s_finish = s_mid; 
 						}
 						else{
-							s_begin = s_mid; //+ size_type(1);
+							s_begin = s_mid; 
 						}
 					}
 				}
@@ -433,10 +424,10 @@ namespace ra::container {
 							search_done = true;
 						}
 						else if(compare_obj_(k,*s_mid)){
-							s_finish = s_mid; //- size_type(1);
+							s_finish = s_mid; 
 						}
 						else{
-							s_begin = s_mid; // + size_type(1);
+							s_begin = s_mid; 
 						}
 					}
 				}
@@ -449,7 +440,6 @@ namespace ra::container {
 			}
 
 		private:
-			//char* buffer_;
 			key_type* begin_;
 			key_type* end_;
 			key_type* finish_;

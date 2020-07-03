@@ -41,8 +41,6 @@ namespace ra::intrusive {
 	template <class T, list_hook T::* Hook>
 	class list {
 		public:
-
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			typedef typename std::vector<T>::const_iterator const_itr_impl;
 			class list_const_iterator : public const_itr_impl {
 				public:
@@ -58,9 +56,11 @@ namespace ra::intrusive {
 					list_const_iterator(const list_const_iterator& other) : ptr_(other.ptr_) {}
 					list_const_iterator& operator=(const list_const_iterator& other) {
 						ptr_ = other.ptr_;
+						return *this;
 					}
 					list_const_iterator& operator=(const list_hook* otherPtr) {
 						ptr_ = otherPtr;
+						return *this;
 					}
 					bool operator==(const list_const_iterator& other) const {
 						return (ptr_==(other.ptr_));
@@ -74,12 +74,12 @@ namespace ra::intrusive {
 					bool operator!=(const list_hook* otherPtr) const {
 						return (ptr_!=otherPtr);
 					}
-					T* operator->() const {
-						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
+					const T* operator->() const {
+						const T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
 						return el_ptr;
 					}
-					T& operator*() const{
-						T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
+					const T& operator*() const{
+						const T* el_ptr = ra::util::parent_from_member<value_type,list_hook>(ptr_,hook_ptr);
 						return (*el_ptr);
 					}
 
@@ -101,11 +101,12 @@ namespace ra::intrusive {
 						ptr_ = ptr_->prev_;
 						return oldIter;
 					}
+					const list_hook* operator&(){ return ptr_; }//return this; }
+					const list_hook* operator()(){ return ptr_; }
 					const list_hook* getPtr() const { return ptr_; }
 				private:
 					const list_hook* ptr_;
 			};
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			typedef typename std::vector<T>::iterator itr_impl;
 			class list_iterator : public itr_impl {
@@ -123,20 +124,29 @@ namespace ra::intrusive {
 					list_iterator(const list_const_iterator& other): ptr_(other.ptr_) {}
 					list_iterator& operator=(const list_iterator& other) {
 						ptr_ = other.ptr_;
+						return *this;
 					}
 					list_iterator& operator=(const list_const_iterator& other){
 						ptr_ = other.ptr_;
+						return *this;
 					}
 					list_iterator& operator=(list_hook* otherPtr) {
 						ptr_ = otherPtr;
+						return *this;
 					}
 					bool operator==(const list_iterator& other) const {
+						return (ptr_==(other.ptr_));
+					}
+					bool operator==(const list_const_iterator& other) const {
 						return (ptr_==(other.ptr_));
 					}
 					bool operator==(list_hook* otherPtr) const {
 						return (ptr_==otherPtr);
 					}
 					bool operator!=(const list_iterator& other) const {
+						return (ptr_!=(other.ptr_));
+					}
+					bool operator!=(const list_const_iterator& other) const {
 						return (ptr_!=(other.ptr_));
 					}
 					bool operator!=(list_hook* otherPtr) const {
@@ -169,6 +179,8 @@ namespace ra::intrusive {
 						ptr_ = ptr_->prev_;
 						return oldIter;
 					}
+					list_hook* operator&() { return ptr_; }//return this; }
+					list_hook* operator()(){ return ptr_; }
 					list_hook* getPtr() const { return ptr_; }
 				private:
 					list_hook* ptr_;
@@ -353,15 +365,6 @@ namespace ra::intrusive {
 			// Erases any elements from the list, yielding an empty list.
 			// Time complexity: Either linear or constant.
 			void clear(){
-				/*list_hook* current_hook = (sent_node_.prev_)->next_;
-				list_hook* next_hook;
-				for(size_type i=0; i<=size_; ++i){
-					next_hook = current_hook->next_;
-					current_hook->next_ = current_hook;
-					current_hook->prev_ = current_hook;
-					current_hook = next_hook;
-				}
-				*/
 				list_hook* itslf = (sent_node_.prev_)->next_;
 				sent_node_.prev_ = itslf;
 				sent_node_.next_ = itslf;
@@ -395,17 +398,9 @@ namespace ra::intrusive {
 			// element.
 			// Time complexity: Constant.
 			const_iterator end() const {
-			       /*const iterator last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
-			       const iterator end_element = last_element + 1;
-			       return end_element;*/
 			       return &sent_node_;	
 			}
 			iterator end() {
-				/*list_hook* last_hook = sent_node_.prev_;
-				iterator last_element = ra::util::parent_from_member<value_type,list_hook>(last_hook,hook_ptr);
-				iterator end_element = last_element + 1;
-				return end_element;
-				*/
 				return &sent_node_;
 			}
 
